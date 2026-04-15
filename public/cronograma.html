@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma CT — Controlo Total</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#090909;--bg2:#0f0f0f;--card:#141414;--ac:#c8a84e;--ad:#8a7235;--tx:#e8e4dc;--t2:#94918b;--mu:#5a5855;--dg:#8b2020;--ol:#4a5a2b;--st:#2a2d30;--radius:6px;--font-head:'Oswald',sans-serif;--font-mono:'JetBrains Mono',monospace;--font-body:'Source Serif 4',Georgia,serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:var(--font-body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.container{max-width:780px;margin:0 auto;padding:32px 20px}
+.back{display:inline-block;margin-bottom:20px;padding:8px 16px;background:var(--card);color:var(--t2);text-decoration:none;border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;border:1px solid var(--st);transition:all 0.2s}
+.back:hover{color:var(--ac);border-color:var(--ad)}
+h1{font-family:var(--font-head);font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:4px;color:var(--ac);text-transform:uppercase;line-height:1.1;margin-bottom:4px}
+.subtitle{font-family:var(--font-head);font-size:clamp(14px,2.5vw,18px);font-weight:300;letter-spacing:3px;color:var(--t2);text-transform:uppercase;margin-bottom:24px}
+p{color:var(--t2);margin-bottom:12px}
+p b{color:var(--tx)}
+footer{text-align:center;padding:32px 20px;margin-top:20px;border-top:1px solid var(--st);font-family:var(--font-mono);font-size:10px;color:var(--st);letter-spacing:2px}
+
+/* Day tabs */
+.day-tabs{display:flex;gap:2px;margin:24px 0 0;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden}
+.day-tab{flex:1;padding:14px 16px;text-align:center;cursor:pointer;font-family:var(--font-head);font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--t2);background:var(--card);border:1px solid var(--st);border-bottom:none;transition:all 0.2s;text-decoration:none}
+.day-tab:hover{color:var(--ac)}
+.day-tab.active{color:var(--bg);background:var(--ac);border-color:var(--ac)}
+.day-tab .day-num{display:block;font-size:24px;font-weight:700;line-height:1;margin-bottom:2px}
+.day-tab.active .day-num{color:var(--bg)}
+
+/* Day content */
+.day-content{display:none;background:var(--bg2);border:1px solid var(--st);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:20px}
+.day-content.active{display:block}
+
+/* Timeline */
+.tl{position:relative;padding-left:80px}
+.tl::before{content:'';position:absolute;left:62px;top:0;bottom:0;width:2px;background:var(--st)}
+.tl-item{position:relative;padding:12px 0 20px;border-bottom:1px solid rgba(42,45,48,0.4)}
+.tl-item:last-child{border-bottom:none;padding-bottom:0}
+.tl-time{position:absolute;left:-80px;top:12px;font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--ac);width:56px;text-align:right}
+.tl-dot{position:absolute;left:-22px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--ac);border:2px solid var(--bg2)}
+.tl-item.mission .tl-dot{background:var(--dg);width:12px;height:12px;left:-23px;top:15px;border:2px solid #ffcc00}
+.tl-item.rest .tl-dot{background:var(--ol);border-color:var(--bg2)}
+.tl-item.meal .tl-dot{background:var(--ad);border-color:var(--bg2)}
+.tl-title{font-family:var(--font-head);font-size:16px;font-weight:600;letter-spacing:1px;color:var(--tx);margin-bottom:4px}
+.tl-item.mission .tl-title{color:var(--dg)}
+.tl-desc{font-size:13px;color:var(--t2);line-height:1.5}
+.tl-desc b{color:var(--tx)}
+.tl-badge{display:inline-block;font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:20px;margin-top:4px;text-transform:uppercase}
+.badge-mission{background:rgba(139,32,32,0.15);color:#da5a5a}
+.badge-class{background:rgba(58,106,170,0.12);color:#5a9ada}
+.badge-meal{background:rgba(138,114,53,0.15);color:var(--ac)}
+.badge-rest{background:rgba(74,90,43,0.12);color:#8bba4a}
+.badge-activity{background:rgba(170,122,58,0.12);color:#daa04a}
+
+/* Day summary */
+.day-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:2px;margin:0 0 16px;border-radius:var(--radius);overflow:hidden}
+.ds-item{background:var(--card);padding:10px 14px;text-align:center}
+.ds-label{font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--ad);text-transform:uppercase;margin-bottom:2px}
+.ds-value{font-size:16px;color:var(--tx);font-weight:700}
+.ds-value.red{color:var(--dg)}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0;padding:12px 16px;background:var(--card);border-radius:var(--radius)}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2)}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.leg-dot.mission{background:var(--dg);border:2px solid #ffcc00}
+.leg-dot.class{background:var(--ac)}
+.leg-dot.meal{background:var(--ad)}
+.leg-dot.rest{background:var(--ol)}
+
+@media(max-width:640px){
+  .day-tabs{flex-direction:column}
+  .day-tab .day-num{font-size:18px;display:inline;margin-right:8px}
+  .tl{padding-left:70px}
+  .tl-time{font-size:12px;width:48px;left:-70px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<a href="index.html" class="back">← Voltar ao site</a>
+
+<h1>Cronograma CT</h1>
+<div class="subtitle">Controlo Total · Abril 2026 · 3 Dias</div>
+
+<p>Programa completo dos 3 dias de formação. <b>Missões</b> marcadas a vermelho. Horários sujeitos a ajuste pelo Comandante.</p>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot mission"></div>Missão</div>
+  <div class="leg-item"><div class="leg-dot class"></div>Sala de aula</div>
+  <div class="leg-item"><div class="leg-dot meal"></div>Refeição</div>
+  <div class="leg-item"><div class="leg-dot rest"></div>Descanso</div>
+</div>
+
+<!-- Day tabs -->
+<div class="day-tabs">
+  <a class="day-tab active" onclick="showDay(1)"><span class="day-num">1</span>Sexta-feira</a>
+  <a class="day-tab" onclick="showDay(2)"><span class="day-num">2</span>Sábado</a>
+  <a class="day-tab" onclick="showDay(3)"><span class="day-num">3</span>Domingo</a>
+</div>
+
+<!-- ═══ DIA 1 — SEXTA ═══ -->
+<div class="day-content active" id="day1">
+  <div class="day-summary">
+    <div class="ds-item"><div class="ds-label">Início</div><div class="ds-value">17:00</div></div>
+    <div class="ds-item"><div class="ds-label">Missões</div><div class="ds-value red">2</div></div>
+    <div class="ds-item"><div class="ds-label">Fim</div><div class="ds-value">02:00+</div></div>
+    <div class="ds-item"><div class="ds-label">Tema</div><div class="ds-value" style="font-size:12px">Apagão Global</div></div>
+  </div>
+
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tl-time">17:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Chegada</div>
+      <div class="tl-desc">Recepção dos participantes. Instalação. Preparação.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">17:30</div><div class="tl-dot"></div>
+      <div class="tl-title">Briefing + Missão Dia 1</div>
+      <div class="tl-desc"><b>Cenário: Apagão Global.</b> Recolha de dispositivos. Designação de funções. Memorização do código. Rota: <b>Chafariz → Coreto → Bifurcação → Casa Rosa → C. Sniper.</b> Transporte de jerricãs. Evacuação de ferido nos últimos 500m.</div>
+      <span class="tl-badge badge-mission">Missão 1 — Orientação</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">19:15</div><div class="tl-dot"></div>
+      <div class="tl-title">Chegada + Sala de Aula (Bunker)</div>
+      <div class="tl-desc">Debrief da missão. Análise de liderança, decisão e comunicação.</div>
+      <span class="tl-badge badge-class">Sala de aula</span>
+    </div>
+    <div class="tl-item meal">
+      <div class="tl-time">20:15</div><div class="tl-dot"></div>
+      <div class="tl-title">Jantar + Preparar Cobertas</div>
+      <div class="tl-desc">Refeição. Preparação das áreas de descanso.</div>
+      <span class="tl-badge badge-meal">Refeição</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">21:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Sala de Aula + Briefing</div>
+      <div class="tl-desc">Preparação para a missão noturna. Briefing da Jangada.</div>
+      <span class="tl-badge badge-class">Sala de aula</span>
+    </div>
+    <div class="tl-item mission">
+      <div class="tl-time">21:30</div><div class="tl-dot"></div>
+      <div class="tl-title">Missão Jangada</div>
+      <div class="tl-desc"><b>Missão noturna.</b> Construção e utilização de jangada. Trabalho de equipa sob pressão e escuridão.</div>
+      <span class="tl-badge badge-mission">Missão 2 — Noturna</span>
+    </div>
+    <div class="tl-item rest">
+      <div class="tl-time">23:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Casernas — Descansar</div>
+      <div class="tl-desc">Descanso nas casernas.</div>
+      <span class="tl-badge badge-rest">Descanso</span>
+    </div>
+    <div class="tl-item mission">
+      <div class="tl-time">02:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Montar Tendas</div>
+      <div class="tl-desc"><b>Despertar forçado.</b> Montagem de tendas em condições de privação de sono.</div>
+      <span class="tl-badge badge-mission">Prova — Resiliência</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DIA 2 — SÁBADO ═══ -->
+<div class="day-content" id="day2">
+  <div class="day-summary">
+    <div class="ds-item"><div class="ds-label">Início</div><div class="ds-value">08:00</div></div>
+    <div class="ds-item"><div class="ds-label">Missões</div><div class="ds-value red">3</div></div>
+    <div class="ds-item"><div class="ds-label">Fim</div><div class="ds-value">02:00+</div></div>
+    <div class="ds-item"><div class="ds-label">Tema</div><div class="ds-value" style="font-size:12px">Tático + Mental</div></div>
+  </div>
+
+  <div class="tl">
+    <div class="tl-item meal">
+      <div class="tl-time">08:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Pequeno-Almoço</div>
+      <div class="tl-desc">Refeição matinal.</div>
+      <span class="tl-badge badge-meal">Refeição</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">09:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Sala de Aula — Técnicas Forças Especiais + Protocolo 6</div>
+      <div class="tl-desc"><b>Formação teórica e prática.</b> Técnicas de forças especiais. Protocolo 6.</div>
+      <span class="tl-badge badge-class">Sala de aula</span>
+    </div>
+    <div class="tl-item mission">
+      <div class="tl-time">11:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Missão Túneis</div>
+      <div class="tl-desc"><b>2 grupos.</b> Transporte de jerrycans através de túneis. Apenas 1 lanterna por grupo. Claustrofobia, orientação e gestão de stress.</div>
+      <span class="tl-badge badge-mission">Missão 3 — Túneis</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">12:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Debriefing + Almoço</div>
+      <div class="tl-desc">Análise da missão dos túneis. Refeição.</div>
+      <span class="tl-badge badge-meal">Debrief + Refeição</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">14:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Sala de Aula — Mentalidade (Álvaro)</div>
+      <div class="tl-desc"><b>Sessão de mentalidade e mindset.</b> Formação com Álvaro.</div>
+      <span class="tl-badge badge-class">Sala de aula</span>
+    </div>
+    <div class="tl-item mission">
+      <div class="tl-time">16:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Missão Hangar — Recolha de Rações</div>
+      <div class="tl-desc"><b>Missão tática.</b> Recolha de rações de combate no Hangar.</div>
+      <span class="tl-badge badge-mission">Missão 4 — Hangar</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">17:30</div><div class="tl-dot"></div>
+      <div class="tl-title">Debriefing</div>
+      <div class="tl-desc">Análise da missão Hangar.</div>
+      <span class="tl-badge badge-class">Debrief</span>
+    </div>
+    <div class="tl-item meal">
+      <div class="tl-time">19:30</div><div class="tl-dot"></div>
+      <div class="tl-title">Jantar</div>
+      <div class="tl-desc">Refeição.</div>
+      <span class="tl-badge badge-meal">Refeição</span>
+    </div>
+    <div class="tl-item mission">
+      <div class="tl-time">21:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Missão Recolha de Viaturas</div>
+      <div class="tl-desc"><b>EMBOSCADA + Hangar + Marcha.</b> Missão noturna complexa com múltiplas fases: emboscada, recuperação no Hangar, marcha forçada.</div>
+      <span class="tl-badge badge-mission">Missão 5 — Noturna · Emboscada</span>
+    </div>
+    <div class="tl-item rest">
+      <div class="tl-time">02:00</div><div class="tl-dot"></div>
+      <div class="tl-title">FIM — Descanso</div>
+      <div class="tl-desc">Podem dormir nas cobertas.</div>
+      <span class="tl-badge badge-rest">Descanso</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DIA 3 — DOMINGO ═══ -->
+<div class="day-content" id="day3">
+  <div class="day-summary">
+    <div class="ds-item"><div class="ds-label">Início</div><div class="ds-value">09:00</div></div>
+    <div class="ds-item"><div class="ds-label">Atividades</div><div class="ds-value">2</div></div>
+    <div class="ds-item"><div class="ds-label">Fim</div><div class="ds-value">~13:00</div></div>
+    <div class="ds-item"><div class="ds-label">Tema</div><div class="ds-value" style="font-size:12px">Fecho + Superação</div></div>
+  </div>
+
+  <div class="tl">
+    <div class="tl-item meal">
+      <div class="tl-time">09:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Pequeno-Almoço</div>
+      <div class="tl-desc">Última refeição antes do encerramento.</div>
+      <span class="tl-badge badge-meal">Refeição</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">10:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Recolha de Viaturas</div>
+      <div class="tl-desc">Organização logística. Preparação para atividade final.</div>
+      <span class="tl-badge badge-activity">Logística</span>
+    </div>
+    <div class="tl-item mission">
+      <div class="tl-time">10:30</div><div class="tl-dot"></div>
+      <div class="tl-title">Salto para o Trapézio</div>
+      <div class="tl-desc"><b>Prova de superação pessoal.</b> Salto para o trapézio no Parque Aventura Sniper. Enfrentar o medo. Última prova individual.</div>
+      <span class="tl-badge badge-mission">Prova Final — Superação</span>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">12:00</div><div class="tl-dot"></div>
+      <div class="tl-title">Debriefing Final + Almoço</div>
+      <div class="tl-desc"><b>Ração de combate.</b> Debrief final dos 3 dias. Reflexão. Encerramento do programa Controlo Total.</div>
+      <span class="tl-badge badge-meal">Debrief final + Ração</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>OPERAÇÃO CONTROLO TOTAL · MIGUEL DELGADO · ABRIL 2026</footer>
+
+<script>
+function showDay(n) {
+  document.querySelectorAll('.day-content').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('day' + n).classList.add('active');
+  document.querySelectorAll('.day-tab')[n - 1].classList.add('active');
+}
+</script>
+</body>
+</html>
